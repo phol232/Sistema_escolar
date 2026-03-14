@@ -1,0 +1,18 @@
+/*
+label: Tangerine
+value: tangerine
+*/
+
+:root[data-theme-preset="tangerine"] {
+  --radius: 0.5rem;
+  --primary: oklch(0.69 0.19 52.5);
+  --primary-foreground: oklch(0.17 0.02 50);
+  --secondary: oklch(0.98 0.012 80);
+  --secondary-foreground: oklch(0.27 0.03 50);
+  --accent: oklch(0.95 0.04 60);
+  --accent-foreground: oklch(0.3 0.03 45);
+  --sidebar-primary: oklch(0.69 0.19 52.5);
+  --sidebar-primary-foreground: oklch(0.17 0.02 50);
+  --sidebar-accent: oklch(0.96 0.03 68);
+  --sidebar-accent-foreground: oklch(0.3 0.03 45);
+}

@@ -1,0 +1,30 @@
+/*
+label: Soft Pop
+value: soft-pop
+*/
+
+:root[data-theme-preset="soft-pop"] {
+  --radius: 0.5rem;
+  --primary: oklch(0.546 0.245 262.881);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.976 0.003 247.858);
+  --secondary-foreground: oklch(0.208 0.042 265.755);
+  --accent: oklch(0.962 0.012 255.508);
+  --accent-foreground: oklch(0.27 0.04 262);
+  --sidebar: oklch(0.989 0.001 247.839);
+  --sidebar-foreground: oklch(0.148 0.004 228.8);
+  --sidebar-primary: oklch(0.546 0.245 262.881);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.962 0.012 255.508);
+  --sidebar-accent-foreground: oklch(0.27 0.04 262);
+  --sidebar-border: oklch(0.929 0.006 255.815);
+  --sidebar-ring: oklch(0.723 0.014 214.4);
+  --shadow-sm: 0 10px 24px hsl(230 40% 20% / 0.06);
+  --shadow-md: 0 16px 34px hsl(230 40% 20% / 0.08);
+  --shadow-lg: 0 22px 44px hsl(230 40% 20% / 0.10);
+}
+
+.dark:root[data-theme-preset="soft-pop"] {
+  --primary: oklch(0.623 0.214 259.815);
+  --sidebar-primary: oklch(0.623 0.214 259.815);
+}
