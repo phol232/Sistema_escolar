@@ -87,16 +87,8 @@ export const DASHBOARD_NAV: NavItem[] = [
     module: "configuracion",
   },
   {
-    href: "/configuracion/anio-escolar",
-    label: "Años",
-    roles: ADMIN_ROLES,
-    icon: "calendarRange",
-    iconColor: "text-amber-600",
-    module: "configuracion",
-  },
-  {
     href: "/configuracion/niveles-grados",
-    label: "Niveles",
+    label: "Años y Niveles",
     roles: ADMIN_ROLES,
     icon: "school",
     iconColor: "text-amber-600",
@@ -226,3 +218,4 @@ export const ROLE_GUARDS = {
   academico: ["super_admin", "director", "subdirector", "docente", "tutor"],
   evaluaciones: ["super_admin", "director", "subdirector", "docente", "tutor", "apoderado"],
 } satisfies Record<string, readonly AppRole[]>;
+

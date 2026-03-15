@@ -35,6 +35,7 @@ function toFormState(docente?: DocenteRecord) {
 
 export function DocentesManager({ docentes, pagination }: DocentesManagerProps) {
   const router = useRouter();
+  const [rows, setRows] = useState(docentes);
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -48,6 +49,10 @@ export function DocentesManager({ docentes, pagination }: DocentesManagerProps) 
   const [isPending, startTransition] = useTransition();
   const [isPersonaPending, startPersonaTransition] = useTransition();
   const debouncedPersonaQuery = useDebounce(personaQuery, 250);
+
+  useEffect(() => {
+    setRows(docentes);
+  }, [docentes]);
 
   const availablePersonaOptions = useMemo(() => {
     if (editing && !personaOptions.some((option) => option.value === editing.persona_id)) {
@@ -123,6 +128,24 @@ export function DocentesManager({ docentes, pagination }: DocentesManagerProps) 
         return;
       }
 
+      const selectedPersona = availablePersonaOptions.find((option) => option.value === form.persona_id);
+      setRows((current) => {
+        const optimistic: DocenteRecord = {
+          id: editing?.id ?? `tmp-${Date.now()}`,
+          persona_id: form.persona_id,
+          persona_nombre: selectedPersona?.label ?? editing?.persona_nombre ?? "Persona",
+          dni: selectedPersona?.helper ?? editing?.dni ?? "",
+          especialidad: form.especialidad || null,
+          fecha_contratacion: form.fecha_contratacion || null,
+          estado: form.estado,
+        };
+
+        if (editing) {
+          return current.map((row) => (row.id === editing.id ? optimistic : row));
+        }
+
+        return [optimistic, ...current];
+      });
       closeForm();
       router.refresh();
     });
@@ -142,6 +165,7 @@ export function DocentesManager({ docentes, pagination }: DocentesManagerProps) 
         return;
       }
 
+      setRows((current) => current.filter((row) => row.id !== deleting.id));
       setDeleting(null);
       router.refresh();
     });
@@ -203,7 +227,7 @@ export function DocentesManager({ docentes, pagination }: DocentesManagerProps) 
           setError(null);
           setForm(toFormState(row));
         }}
-        rows={docentes}
+        rows={rows}
         title="Gestión de docentes"
       />
 

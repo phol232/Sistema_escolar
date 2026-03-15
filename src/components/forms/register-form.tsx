@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { InputShell } from "@/components/ui/input-shell";
 import { type RegisterFormValues, registerSchema } from "@/lib/validations/auth.schema";
 
 export function RegisterForm() {
@@ -49,9 +50,6 @@ export function RegisterForm() {
     });
   }
 
-  const authInputShellClass =
-    "flex items-center gap-3 rounded-lg border border-input bg-card px-3 shadow-xs transition-colors focus-within:border-primary/40 focus-within:bg-primary/[0.06] focus-within:ring-4 focus-within:ring-ring/15 data-[filled=true]:border-primary/20 data-[filled=true]:bg-primary/[0.06]";
-
   return (
     <Card className="h-full min-h-[680px] w-full border-border bg-card shadow-lg">
       <CardHeader className="space-y-3 border-b border-border pb-5">
@@ -83,7 +81,7 @@ export function RegisterForm() {
                   <FormItem>
                     <FormLabel>Nombres</FormLabel>
                     <FormControl>
-                      <div className={authInputShellClass} data-filled={Boolean(field.value)}>
+                      <InputShell filled={Boolean(field.value)}>
                         <UserRound className="h-4 w-4 text-muted-foreground" />
                         <Input
                           autoComplete="given-name"
@@ -91,7 +89,7 @@ export function RegisterForm() {
                           placeholder="Juan Carlos"
                           {...field}
                         />
-                      </div>
+                      </InputShell>
                     </FormControl>
                     {fieldState.error ? <FormMessage>{fieldState.error.message}</FormMessage> : null}
                   </FormItem>
@@ -104,7 +102,7 @@ export function RegisterForm() {
                   <FormItem>
                     <FormLabel>Apellidos</FormLabel>
                     <FormControl>
-                      <div className={authInputShellClass} data-filled={Boolean(field.value)}>
+                      <InputShell filled={Boolean(field.value)}>
                         <UserRound className="h-4 w-4 text-muted-foreground" />
                         <Input
                           autoComplete="family-name"
@@ -112,7 +110,7 @@ export function RegisterForm() {
                           placeholder="Pérez Gómez"
                           {...field}
                         />
-                      </div>
+                      </InputShell>
                     </FormControl>
                     {fieldState.error ? <FormMessage>{fieldState.error.message}</FormMessage> : null}
                   </FormItem>
@@ -128,7 +126,7 @@ export function RegisterForm() {
                   <FormItem>
                     <FormLabel>DNI</FormLabel>
                     <FormControl>
-                      <div className={authInputShellClass} data-filled={Boolean(field.value)}>
+                      <InputShell filled={Boolean(field.value)}>
                         <IdCard className="h-4 w-4 text-muted-foreground" />
                         <Input
                           autoComplete="off"
@@ -137,7 +135,7 @@ export function RegisterForm() {
                           placeholder="12345678"
                           {...field}
                         />
-                      </div>
+                      </InputShell>
                     </FormControl>
                     {fieldState.error ? <FormMessage>{fieldState.error.message}</FormMessage> : null}
                   </FormItem>
@@ -150,7 +148,7 @@ export function RegisterForm() {
                   <FormItem>
                     <FormLabel>Correo</FormLabel>
                     <FormControl>
-                      <div className={authInputShellClass} data-filled={Boolean(field.value)}>
+                      <InputShell filled={Boolean(field.value)}>
                         <Mail className="h-4 w-4 text-muted-foreground" />
                         <Input
                           autoComplete="email"
@@ -159,7 +157,7 @@ export function RegisterForm() {
                           type="email"
                           {...field}
                         />
-                      </div>
+                      </InputShell>
                     </FormControl>
                     {fieldState.error ? <FormMessage>{fieldState.error.message}</FormMessage> : null}
                   </FormItem>
@@ -175,7 +173,7 @@ export function RegisterForm() {
                   <FormItem>
                     <FormLabel>Contraseña</FormLabel>
                     <FormControl>
-                      <div className={authInputShellClass} data-filled={Boolean(field.value)}>
+                      <InputShell filled={Boolean(field.value)}>
                         <LockKeyhole className="h-4 w-4 text-muted-foreground" />
                         <Input
                           autoComplete="new-password"
@@ -192,7 +190,7 @@ export function RegisterForm() {
                         >
                           {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
-                      </div>
+                      </InputShell>
                     </FormControl>
                     {fieldState.error ? <FormMessage>{fieldState.error.message}</FormMessage> : null}
                   </FormItem>
@@ -205,7 +203,7 @@ export function RegisterForm() {
                   <FormItem>
                     <FormLabel>Confirmar contraseña</FormLabel>
                     <FormControl>
-                      <div className={authInputShellClass} data-filled={Boolean(field.value)}>
+                      <InputShell filled={Boolean(field.value)}>
                         <LockKeyhole className="h-4 w-4 text-muted-foreground" />
                         <Input
                           autoComplete="new-password"
@@ -222,7 +220,7 @@ export function RegisterForm() {
                         >
                           {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                         </button>
-                      </div>
+                      </InputShell>
                     </FormControl>
                     {fieldState.error ? <FormMessage>{fieldState.error.message}</FormMessage> : null}
                   </FormItem>

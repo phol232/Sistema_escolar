@@ -332,7 +332,7 @@ const getAniosRowsCached = unstable_cache(
   },
   ["phase2-config-anios"],
   {
-    revalidate: 300,
+    revalidate: 60,
     tags: [PHASE2_CONFIG_ANIOS_TAG],
   },
 );
@@ -359,7 +359,7 @@ const getNivelesGradosRowsCached = unstable_cache(
   },
   ["phase2-config-niveles-grados"],
   {
-    revalidate: 300,
+    revalidate: 60,
     tags: [PHASE2_CONFIG_NIVELES_GRADOS_TAG],
   },
 );
@@ -376,7 +376,7 @@ const getAulasRowsCached = unstable_cache(
   },
   ["phase2-config-aulas"],
   {
-    revalidate: 300,
+    revalidate: 60,
     tags: [PHASE2_CONFIG_AULAS_TAG],
   },
 );

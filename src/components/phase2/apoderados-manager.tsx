@@ -33,6 +33,7 @@ function toFormState(apoderado?: ApoderadoRecord) {
 
 export function ApoderadosManager({ apoderados, pagination }: ApoderadosManagerProps) {
   const router = useRouter();
+  const [rows, setRows] = useState(apoderados);
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -46,6 +47,10 @@ export function ApoderadosManager({ apoderados, pagination }: ApoderadosManagerP
   const [isPending, startTransition] = useTransition();
   const [isPersonaPending, startPersonaTransition] = useTransition();
   const debouncedPersonaQuery = useDebounce(personaQuery, 250);
+
+  useEffect(() => {
+    setRows(apoderados);
+  }, [apoderados]);
 
   const availablePersonaOptions = useMemo(() => {
     if (editing && !personaOptions.some((option) => option.value === editing.persona_id)) {
@@ -121,6 +126,23 @@ export function ApoderadosManager({ apoderados, pagination }: ApoderadosManagerP
         return;
       }
 
+      const selectedPersona = availablePersonaOptions.find((option) => option.value === form.persona_id);
+      setRows((current) => {
+        const optimistic: ApoderadoRecord = {
+          id: editing?.id ?? `tmp-${Date.now()}`,
+          persona_id: form.persona_id,
+          persona_nombre: selectedPersona?.label ?? editing?.persona_nombre ?? "Persona",
+          dni: selectedPersona?.helper ?? editing?.dni ?? "",
+          ocupacion: form.ocupacion || null,
+          estado: form.estado,
+        };
+
+        if (editing) {
+          return current.map((row) => (row.id === editing.id ? optimistic : row));
+        }
+
+        return [optimistic, ...current];
+      });
       closeForm();
       router.refresh();
     });
@@ -140,6 +162,7 @@ export function ApoderadosManager({ apoderados, pagination }: ApoderadosManagerP
         return;
       }
 
+      setRows((current) => current.filter((row) => row.id !== deleting.id));
       setDeleting(null);
       router.refresh();
     });
@@ -195,7 +218,7 @@ export function ApoderadosManager({ apoderados, pagination }: ApoderadosManagerP
           setError(null);
           setForm(toFormState(row));
         }}
-        rows={apoderados}
+        rows={rows}
         title="Gestión de apoderados"
       />
 

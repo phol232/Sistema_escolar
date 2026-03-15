@@ -34,6 +34,7 @@ function toFormState(alumno?: AlumnoRecord) {
 
 export function AlumnosManager({ alumnos, pagination }: AlumnosManagerProps) {
   const router = useRouter();
+  const [rows, setRows] = useState(alumnos);
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -47,6 +48,10 @@ export function AlumnosManager({ alumnos, pagination }: AlumnosManagerProps) {
   const [isPending, startTransition] = useTransition();
   const [isPersonaPending, startPersonaTransition] = useTransition();
   const debouncedPersonaQuery = useDebounce(personaQuery, 250);
+
+  useEffect(() => {
+    setRows(alumnos);
+  }, [alumnos]);
 
   const availablePersonaOptions = useMemo(() => {
     if (editing && !personaOptions.some((option) => option.value === editing.persona_id)) {
@@ -122,6 +127,24 @@ export function AlumnosManager({ alumnos, pagination }: AlumnosManagerProps) {
         return;
       }
 
+      const selectedPersona = availablePersonaOptions.find((option) => option.value === form.persona_id);
+      setRows((current) => {
+        const optimistic: AlumnoRecord = {
+          id: editing?.id ?? `tmp-${Date.now()}`,
+          persona_id: form.persona_id,
+          persona_nombre: selectedPersona?.label ?? editing?.persona_nombre ?? "Persona",
+          dni: selectedPersona?.helper ?? editing?.dni ?? "",
+          codigo_estudiante: form.codigo_estudiante,
+          procedencia_colegio: form.procedencia_colegio || null,
+          estado: form.estado,
+        };
+
+        if (editing) {
+          return current.map((row) => (row.id === editing.id ? optimistic : row));
+        }
+
+        return [optimistic, ...current];
+      });
       closeForm();
       router.refresh();
     });
@@ -141,6 +164,7 @@ export function AlumnosManager({ alumnos, pagination }: AlumnosManagerProps) {
         return;
       }
 
+      setRows((current) => current.filter((row) => row.id !== deleting.id));
       setDeleting(null);
       router.refresh();
     });
@@ -203,7 +227,7 @@ export function AlumnosManager({ alumnos, pagination }: AlumnosManagerProps) {
           setError(null);
           setForm(toFormState(row));
         }}
-        rows={alumnos}
+        rows={rows}
         title="Gestión de alumnos"
       />
 

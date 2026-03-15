@@ -153,7 +153,7 @@ export async function upsertAnioEscolarAction(payload: { id?: string | null; val
   const result = fromError(response.error, "No se pudo guardar el año escolar.");
 
   if (result.ok) {
-    safeRevalidate("/configuracion/anio-escolar");
+    safeRevalidate("/configuracion/anio-escolar", "/configuracion/niveles-grados");
     safeRevalidateTags(PHASE2_CONFIG_ANIOS_TAG);
   }
 
@@ -166,7 +166,7 @@ export async function deleteAnioEscolarAction(id: string): Promise<ActionResult>
   const result = fromError(response.error, "No se pudo eliminar el año escolar.");
 
   if (result.ok) {
-    safeRevalidate("/configuracion/anio-escolar");
+    safeRevalidate("/configuracion/anio-escolar", "/configuracion/niveles-grados");
     safeRevalidateTags(PHASE2_CONFIG_ANIOS_TAG);
   }
 
@@ -343,19 +343,26 @@ export async function searchAlumnoPersonaOptionsAction(payload?: {
     );
   }
 
-  const [personasResponse, alumnosResponse] = await Promise.all([
-    personasQuery,
-    admin().from("alumnos").select("persona_id"),
-  ]);
+  const personasResponse = await personasQuery;
+  if (personasResponse.error) {
+    return [];
+  }
 
-  if (personasResponse.error || alumnosResponse.error) {
+  const personas = personasResponse.data ?? [];
+  const candidatePersonaIds = personas.map((row: any) => row.id).filter(Boolean);
+  if (candidatePersonaIds.length === 0) {
+    return [];
+  }
+
+  const alumnosResponse = await admin().from("alumnos").select("persona_id").in("persona_id", candidatePersonaIds);
+  if (alumnosResponse.error) {
     return [];
   }
 
   const taken = new Set((alumnosResponse.data ?? []).map((item: { persona_id: string }) => item.persona_id));
   const includePersonaId = payload?.includePersonaId ?? null;
 
-  return (personasResponse.data ?? [])
+  return personas
     .filter((row: any) => row.id === includePersonaId || !taken.has(row.id))
     .slice(0, limit)
     .map((row: any) => ({
@@ -430,19 +437,26 @@ export async function searchDocentePersonaOptionsAction(payload?: {
     );
   }
 
-  const [personasResponse, docentesResponse] = await Promise.all([
-    personasQuery,
-    admin().from("docentes").select("persona_id"),
-  ]);
+  const personasResponse = await personasQuery;
+  if (personasResponse.error) {
+    return [];
+  }
 
-  if (personasResponse.error || docentesResponse.error) {
+  const personas = personasResponse.data ?? [];
+  const candidatePersonaIds = personas.map((row: any) => row.id).filter(Boolean);
+  if (candidatePersonaIds.length === 0) {
+    return [];
+  }
+
+  const docentesResponse = await admin().from("docentes").select("persona_id").in("persona_id", candidatePersonaIds);
+  if (docentesResponse.error) {
     return [];
   }
 
   const taken = new Set((docentesResponse.data ?? []).map((item: { persona_id: string }) => item.persona_id));
   const includePersonaId = payload?.includePersonaId ?? null;
 
-  return (personasResponse.data ?? [])
+  return personas
     .filter((row: any) => row.id === includePersonaId || !taken.has(row.id))
     .slice(0, limit)
     .map((row: any) => ({
@@ -516,19 +530,26 @@ export async function searchApoderadoPersonaOptionsAction(payload?: {
     );
   }
 
-  const [personasResponse, apoderadosResponse] = await Promise.all([
-    personasQuery,
-    admin().from("apoderados").select("persona_id"),
-  ]);
+  const personasResponse = await personasQuery;
+  if (personasResponse.error) {
+    return [];
+  }
 
-  if (personasResponse.error || apoderadosResponse.error) {
+  const personas = personasResponse.data ?? [];
+  const candidatePersonaIds = personas.map((row: any) => row.id).filter(Boolean);
+  if (candidatePersonaIds.length === 0) {
+    return [];
+  }
+
+  const apoderadosResponse = await admin().from("apoderados").select("persona_id").in("persona_id", candidatePersonaIds);
+  if (apoderadosResponse.error) {
     return [];
   }
 
   const taken = new Set((apoderadosResponse.data ?? []).map((item: { persona_id: string }) => item.persona_id));
   const includePersonaId = payload?.includePersonaId ?? null;
 
-  return (personasResponse.data ?? [])
+  return personas
     .filter((row: any) => row.id === includePersonaId || !taken.has(row.id))
     .slice(0, limit)
     .map((row: any) => ({
@@ -573,3 +594,4 @@ export async function deleteVinculoAction(id: string): Promise<ActionResult> {
 
   return result;
 }
+

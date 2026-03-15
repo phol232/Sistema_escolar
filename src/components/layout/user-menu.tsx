@@ -16,7 +16,7 @@ interface UserMenuProps {
 
 function getSettingsHref(role: AppUser["role"]) {
   if (role === "super_admin" || role === "director") {
-    return "/configuracion/anio-escolar";
+    return "/configuracion/niveles-grados";
   }
 
   return "/inicio";

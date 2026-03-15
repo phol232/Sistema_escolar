@@ -1,8 +1,11 @@
 import { NivelesGradosManager } from "@/components/phase2/niveles-grados-manager";
-import { getNivelesGradosPageData } from "@/lib/phase2/server";
+import { getAniosPageData, getNivelesGradosPageData } from "@/lib/phase2/server";
 
 export default async function NivelesGradosPage() {
-  const { niveles, grados, nivelOptions } = await getNivelesGradosPageData();
+  const [{ anios }, { niveles, grados, nivelOptions }] = await Promise.all([
+    getAniosPageData(),
+    getNivelesGradosPageData(),
+  ]);
 
-  return <NivelesGradosManager grados={grados} nivelOptions={nivelOptions} niveles={niveles} />;
+  return <NivelesGradosManager anios={anios} grados={grados} nivelOptions={nivelOptions} niveles={niveles} />;
 }

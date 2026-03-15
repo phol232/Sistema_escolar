@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { deleteAulaAction, upsertAulaAction } from "@/app/(dashboard)/phase2/actions";
@@ -23,6 +23,7 @@ function toFormState(aula?: AulaRecord) {
 
 export function AulasManager({ aulas }: AulasManagerProps) {
   const router = useRouter();
+  const [rows, setRows] = useState(aulas);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editing, setEditing] = useState<AulaRecord | null>(null);
   const [deleting, setDeleting] = useState<AulaRecord | null>(null);
@@ -30,6 +31,10 @@ export function AulasManager({ aulas }: AulasManagerProps) {
   const [error, setError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    setRows(aulas);
+  }, [aulas]);
 
   function closeForm() {
     setIsFormOpen(false);
@@ -53,6 +58,20 @@ export function AulasManager({ aulas }: AulasManagerProps) {
         return;
       }
 
+      setRows((current) => {
+        const parsedCapacidad = Number(form.capacidad);
+        const optimistic: AulaRecord = {
+          id: editing?.id ?? `tmp-${Date.now()}`,
+          nombre: form.nombre.trim(),
+          capacidad: Number.isFinite(parsedCapacidad) ? parsedCapacidad : 0,
+        };
+
+        if (editing) {
+          return current.map((row) => (row.id === editing.id ? optimistic : row));
+        }
+
+        return [optimistic, ...current];
+      });
       closeForm();
       router.refresh();
     });
@@ -70,6 +89,7 @@ export function AulasManager({ aulas }: AulasManagerProps) {
         return;
       }
 
+      setRows((current) => current.filter((row) => row.id !== deleting.id));
       setDeleting(null);
       router.refresh();
     });
@@ -99,7 +119,7 @@ export function AulasManager({ aulas }: AulasManagerProps) {
           setError(null);
           setForm(toFormState(row));
         }}
-        rows={aulas}
+        rows={rows}
         title="Aulas"
       />
 

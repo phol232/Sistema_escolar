@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { InputShell } from "@/components/ui/input-shell";
 import { cn } from "@/lib/utils";
 import { type LoginFormValues, loginSchema } from "@/lib/validations/auth.schema";
 
@@ -47,8 +48,6 @@ export function LoginForm() {
     });
   }
 
-  const authInputShellClass =
-    "flex items-center gap-3 rounded-lg border border-input bg-card px-3 shadow-xs transition-colors focus-within:border-primary/40 focus-within:bg-primary/[0.06] focus-within:ring-4 focus-within:ring-ring/15 data-[filled=true]:border-primary/20 data-[filled=true]:bg-primary/[0.06]";
   const isRegistered = searchParams.get("registered") === "1";
 
   return (
@@ -100,7 +99,7 @@ export function LoginForm() {
                 <FormItem>
                   <FormLabel>Correo</FormLabel>
                   <FormControl>
-                    <div className={authInputShellClass} data-filled={Boolean(field.value)}>
+                    <InputShell filled={Boolean(field.value)}>
                       <Mail className="h-4 w-4 text-muted-foreground" />
                       <Input
                         autoComplete="email"
@@ -109,7 +108,7 @@ export function LoginForm() {
                         type="email"
                         {...field}
                       />
-                    </div>
+                    </InputShell>
                   </FormControl>
                   {fieldState.error ? <FormMessage>{fieldState.error.message}</FormMessage> : null}
                 </FormItem>
@@ -122,7 +121,7 @@ export function LoginForm() {
                 <FormItem>
                   <FormLabel>Contraseña</FormLabel>
                   <FormControl>
-                    <div className={authInputShellClass} data-filled={Boolean(field.value)}>
+                    <InputShell filled={Boolean(field.value)}>
                       <LockKeyhole className="h-4 w-4 text-muted-foreground" />
                       <Input
                         autoComplete="current-password"
@@ -139,7 +138,7 @@ export function LoginForm() {
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </button>
-                    </div>
+                    </InputShell>
                   </FormControl>
                   {fieldState.error ? <FormMessage>{fieldState.error.message}</FormMessage> : null}
                 </FormItem>

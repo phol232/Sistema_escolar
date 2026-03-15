@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
 import { deleteVinculoAction, upsertVinculoAction } from "@/app/(dashboard)/phase2/actions";
@@ -21,8 +21,8 @@ const PARENTESCO_OPTIONS = [
   { value: "madre", label: "Madre" },
   { value: "abuelo", label: "Abuelo" },
   { value: "abuela", label: "Abuela" },
-  { value: "tio", label: "Tío" },
-  { value: "tia", label: "Tía" },
+  { value: "tio", label: "Tio" },
+  { value: "tia", label: "Tia" },
   { value: "hermano", label: "Hermano" },
   { value: "hermana", label: "Hermana" },
   { value: "apoderado_legal", label: "Apoderado legal" },
@@ -44,6 +44,7 @@ function parentescoLabel(value: string) {
 
 export function VinculosManager({ vinculos, alumnoOptions, apoderadoOptions }: VinculosManagerProps) {
   const router = useRouter();
+  const [rows, setRows] = useState(vinculos);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editing, setEditing] = useState<VinculoRecord | null>(null);
   const [deleting, setDeleting] = useState<VinculoRecord | null>(null);
@@ -52,17 +53,18 @@ export function VinculosManager({ vinculos, alumnoOptions, apoderadoOptions }: V
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  useEffect(() => {
+    setRows(vinculos);
+  }, [vinculos]);
+
   const availableApoderados = useMemo(() => {
     if (!form.alumno_id) {
       return apoderadoOptions;
     }
 
-    const linkedApoderados = new Set(
-      vinculos.filter((item) => item.alumno_id === form.alumno_id).map((item) => item.apoderado_id),
-    );
-
+    const linkedApoderados = new Set(rows.filter((item) => item.alumno_id === form.alumno_id).map((item) => item.apoderado_id));
     return apoderadoOptions.filter((option) => option.value === editing?.apoderado_id || !linkedApoderados.has(option.value));
-  }, [apoderadoOptions, editing?.apoderado_id, form.alumno_id, vinculos]);
+  }, [apoderadoOptions, editing?.apoderado_id, form.alumno_id, rows]);
 
   function closeForm() {
     setIsFormOpen(false);
@@ -82,9 +84,27 @@ export function VinculosManager({ vinculos, alumnoOptions, apoderadoOptions }: V
       });
 
       if (!result.ok) {
-        setError(result.message ?? "No se pudo guardar la vinculación.");
+        setError(result.message ?? "No se pudo guardar la vinculacion.");
         return;
       }
+
+      setRows((current) => {
+        const optimistic: VinculoRecord = {
+          id: editing?.id ?? `tmp-${Date.now()}`,
+          alumno_id: form.alumno_id,
+          alumno_nombre: alumnoOptions.find((item) => item.value === form.alumno_id)?.label ?? "Alumno",
+          apoderado_id: form.apoderado_id,
+          apoderado_nombre: apoderadoOptions.find((item) => item.value === form.apoderado_id)?.label ?? "Apoderado",
+          parentesco: form.parentesco,
+          es_principal: form.es_principal,
+        };
+
+        if (editing) {
+          return current.map((row) => (row.id === editing.id ? optimistic : row));
+        }
+
+        return [optimistic, ...current];
+      });
 
       closeForm();
       router.refresh();
@@ -101,10 +121,11 @@ export function VinculosManager({ vinculos, alumnoOptions, apoderadoOptions }: V
       const result = await deleteVinculoAction(deleting.id);
 
       if (!result.ok) {
-        setDeleteError(result.message ?? "No se pudo eliminar la vinculación.");
+        setDeleteError(result.message ?? "No se pudo eliminar la vinculacion.");
         return;
       }
 
+      setRows((current) => current.filter((row) => row.id !== deleting.id));
       setDeleting(null);
       router.refresh();
     });
@@ -113,7 +134,7 @@ export function VinculosManager({ vinculos, alumnoOptions, apoderadoOptions }: V
   return (
     <>
       <CrudTable
-        actionLabel="Nueva vinculación"
+        actionLabel="Nueva vinculacion"
         columns={[
           {
             header: "Alumno",
@@ -137,13 +158,13 @@ export function VinculosManager({ vinculos, alumnoOptions, apoderadoOptions }: V
             header: "Principal",
             icon: Star,
             iconVariant: "amber",
-            cell: (row) => (row.es_principal ? "Sí" : "No"),
+            cell: (row) => (row.es_principal ? "Si" : "No"),
             className: "whitespace-nowrap",
           },
         ]}
         description="Relaciona alumnos con sus responsables usando selectores por nombre y parentesco visible."
-        emptyDescription="Crea el primer vínculo para identificar responsables familiares por alumno."
-        emptyTitle="No hay vínculos registrados"
+        emptyDescription="Crea el primer vinculo para identificar responsables familiares por alumno."
+        emptyTitle="No hay vinculos registrados"
         onCreate={() => {
           setIsFormOpen(true);
           setEditing(null);
@@ -157,15 +178,15 @@ export function VinculosManager({ vinculos, alumnoOptions, apoderadoOptions }: V
           setError(null);
           setForm(toFormState(row));
         }}
-        rows={vinculos}
-        title="Vinculación alumno-apoderado"
+        rows={rows}
+        title="Vinculacion alumno-apoderado"
       />
 
       <CrudModal
         description="Selecciona al alumno y al apoderado por nombre. El sistema evita repetir el mismo apoderado para el mismo alumno."
         onClose={closeForm}
         open={isFormOpen}
-        title={editing ? "Editar vínculo" : "Nuevo vínculo"}
+        title={editing ? "Editar vinculo" : "Nuevo vinculo"}
       >
         <form className="space-y-4" onSubmit={handleSubmit}>
           <Field label="Alumno">
@@ -189,23 +210,27 @@ export function VinculosManager({ vinculos, alumnoOptions, apoderadoOptions }: V
               onChange={(event) => setForm((current) => ({ ...current, parentesco: event.target.value as typeof form.parentesco }))}
             />
           </Field>
-          <BooleanField checked={form.es_principal} label="Marcar como responsable principal" onChange={(checked) => setForm((current) => ({ ...current, es_principal: checked }))} />
-          <SubmitBar error={error} isPending={isPending} onCancel={closeForm} submitLabel={editing ? "Guardar cambios" : "Crear vínculo"} />
+          <BooleanField
+            checked={form.es_principal}
+            label="Marcar como responsable principal"
+            onChange={(checked) => setForm((current) => ({ ...current, es_principal: checked }))}
+          />
+          <SubmitBar error={error} isPending={isPending} onCancel={closeForm} submitLabel={editing ? "Guardar cambios" : "Crear vinculo"} />
         </form>
       </CrudModal>
 
       <CrudModal
-        description="Se quitará la relación entre el alumno y el apoderado seleccionado."
+        description="Se quitara la relacion entre el alumno y el apoderado seleccionado."
         onClose={() => {
           setDeleting(null);
           setDeleteError(null);
         }}
         open={Boolean(deleting)}
-        title="Eliminar vínculo"
+        title="Eliminar vinculo"
       >
         {deleting ? (
           <DangerBar
-            description={`Se desvinculará a ${deleting.apoderado_nombre} de ${deleting.alumno_nombre}.`}
+            description={`Se desvinculara a ${deleting.apoderado_nombre} de ${deleting.alumno_nombre}.`}
             error={deleteError}
             isPending={isPending}
             onCancel={() => {
@@ -213,7 +238,7 @@ export function VinculosManager({ vinculos, alumnoOptions, apoderadoOptions }: V
               setDeleteError(null);
             }}
             onConfirm={handleDelete}
-            title="¿Seguro que quieres eliminar este vínculo?"
+            title="Seguro que quieres eliminar este vinculo?"
           />
         ) : null}
       </CrudModal>

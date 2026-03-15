@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import type { Route } from "next";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
@@ -44,6 +44,7 @@ function toFormState(persona?: PersonaRecord) {
 
 export function PersonasManager({ personas, pagination }: PersonasManagerProps) {
   const router = useRouter();
+  const [rows, setRows] = useState(personas);
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -53,6 +54,10 @@ export function PersonasManager({ personas, pagination }: PersonasManagerProps) 
   const [error, setError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    setRows(personas);
+  }, [personas]);
 
   function openCreate() {
     setIsFormOpen(true);
@@ -90,6 +95,33 @@ export function PersonasManager({ personas, pagination }: PersonasManagerProps) 
         return;
       }
 
+      setRows((current) => {
+        const optimistic: PersonaRecord = {
+          id: editing?.id ?? `tmp-${Date.now()}`,
+          dni: form.dni,
+          nombres: form.nombres,
+          apellido_paterno: form.apellido_paterno,
+          apellido_materno: form.apellido_materno,
+          fecha_nacimiento: form.fecha_nacimiento || null,
+          sexo: (form.sexo as PersonaRecord["sexo"]) || null,
+          direccion: form.direccion || null,
+          ubigeo: form.ubigeo || null,
+          telefono: form.telefono || null,
+          email: form.email || null,
+          estado: form.estado,
+          nombre_completo: buildFullName({
+            nombres: form.nombres,
+            apellido_paterno: form.apellido_paterno,
+            apellido_materno: form.apellido_materno,
+          }),
+        };
+
+        if (editing) {
+          return current.map((row) => (row.id === editing.id ? optimistic : row));
+        }
+
+        return [optimistic, ...current];
+      });
       closeModal();
       router.refresh();
     });
@@ -122,6 +154,7 @@ export function PersonasManager({ personas, pagination }: PersonasManagerProps) 
         return;
       }
 
+      setRows((current) => current.filter((row) => row.id !== deleting.id));
       setDeleting(null);
       router.refresh();
     });
@@ -172,7 +205,7 @@ export function PersonasManager({ personas, pagination }: PersonasManagerProps) 
         onCreate={openCreate}
         onDelete={setDeleting}
         onEdit={openEdit}
-        rows={personas}
+        rows={rows}
         title="Gestión de personas"
       />
 

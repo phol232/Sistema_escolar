@@ -81,6 +81,9 @@ function errorMessageFromAuth(error: { code?: string; message?: string; status?:
   const normalizedCode = (error.code ?? "").toLowerCase();
   const normalizedMessage = (error.message ?? "").toLowerCase();
 
+  if (error.status === 502 || normalizedMessage.includes("bad gateway")) {
+    return "No se pudo conectar con Supabase Auth (502). Revisa NEXT_PUBLIC_SUPABASE_URL o la configuracion del proxy/dominio.";
+  }
   if (normalizedCode.includes("email") && normalizedCode.includes("exists")) {
     return "El correo ya está registrado en Auth.";
   }
